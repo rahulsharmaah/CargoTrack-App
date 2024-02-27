@@ -1,0 +1,65 @@
+Expanded(
+              child: FutureBuilder<List<ItemUser>>(
+                future: getItemName(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text("Error: ${snapshot.error}"),
+                    );
+                  } else if (snapshot.data == null || snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text("Empty, No Data."),
+                    );
+                  } else {
+                    // Filter items by item name based on search query
+                    List<ItemUser> items = snapshot.data!
+                        .where((item) =>
+                        item.item_name.toLowerCase().contains(searchController.text.toLowerCase()))
+                        .toList();
+
+                    List<DataRow> dataRows = items
+                        .asMap()
+                        .map((index, item) {
+                      int slNo = index + 1;
+                      return MapEntry(
+                        index,
+                        DataRow(cells: [
+                          DataCell(Text(slNo.toString())),
+                          DataCell(Text(item.item_name)),
+                          DataCell(Text(item.item_active)),
+                          DataCell(TextButton(
+                            onPressed: () {
+                              // Perform your action here
+                            },
+                            child: const Text(
+                              "Edit",
+                              style: TextStyle(
+                                fontSize: 11,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          )),
+                        ]),
+                      );
+                    })
+                        .values
+                        .toList();
+
+                    return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                        border: const TableBorder(top: BorderSide(width: 0.5), bottom: BorderSide(width: 0.3)),
+                  dataRowMinHeight: 15,
+                  dataRowMaxHeight: 30,
+                  columns: getColumns(columnWidth),
+                  rows: dataRows,
+                        )
+                  );
+                }
+                },
+              ),
+            ),
